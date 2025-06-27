@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Baby Shower RSVP</title>
+  <meta charset="UTF-8" />
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 500px; margin: auto; }
+    label, select, input { display: block; margin: 10px 0; width: 100%; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<h2>RSVP for the Baby Shower</h2>
+
+<form id="rsvpForm">
+  <label for="name">Select Your Name:</label>
+  <select id="name" required></select>
+
+  <label>Will you attend?</label>
+  <select id="attending" required>
+    <option value="">-- Select --</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+
+  <label for="guests">Number of Guests (optional):</label>
+  <input type="number" id="guests" min="0" />
+
+  <label for="comments">Any comments?</label>
+  <input type="text" id="comments" />
+
+  <button type="submit">Submit RSVP</button>
+</form>
+
+<div id="message"></div>
+
+<script>
+const guestData = {
+  "abcd01": ["John Smith", "Jane Smith"],
+  "efgh02": ["Kumar Family"],
+  "ijkl03": ["Priya Mehta"]
+};
+
+function getCodeFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("rsvp");
+}
+
+function populateNames(code) {
+  const dropdown = document.getElementById("name");
+  dropdown.innerHTML = "<option value=''>-- Select --</option>";
+  if (guestData[code]) {
+    guestData[code].forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      dropdown.appendChild(option);
+    });
+  } else {
+    dropdown.innerHTML = "<option disabled>No valid names found. Check your link.</option>";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const code = getCodeFromURL();
+  if (code) {
+    populateNames(code);
+  } else {
+    document.getElementById("name").innerHTML = "<option disabled>Invalid link</option>";
+  }
+
+  document.getElementById("rsvpForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("name").value,
+      attending: document.getElementById("attending").value,
+      guests: document.getElementById("guests").value,
+      comments: document.getElementById("comments").value,
+      code: getCodeFromURL()
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbwaozl2a6DsF1Nqpu8Z1paWpE8HBcK2359-ilVusrrZGsB6-xRYDDfiHlH51kJD78Z8/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    document.getElementById("message").innerText = "Thank you for your RSVP!";
+    document.getElementById("rsvpForm").reset();
+  });
+});
+</script>
+
+</body>
+</html>
